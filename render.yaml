@@ -9,7 +9,7 @@ services:
   - name: chatwoot-redis
     type: redis
     plan: starter
-    ipAllowList: [] # <-- CORRECCIÓN 1: Permite acceso desde cualquier IP (para empezar)
+    ipAllowList: []
 
   # 2. La Aplicación Web Principal de Chatwoot
   - name: chatwoot-app
@@ -34,10 +34,7 @@ services:
       - key: RAILS_ENV
         value: production
       - key: FRONTEND_URL
-        fromService:
-          type: web
-          name: chatwoot-app
-          property: url # <-- CORRECCIÓN 2: La propiedad correcta es 'url'
+        value: https://${RENDER_SERVICE_NAME}.onrender.com # <-- CORRECCIÓN FINAL
 
     # Comando para preparar la base de datos la primera vez
     preDeployCommand: "bundle exec rails db:chatwoot_prepare"
