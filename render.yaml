@@ -1,0 +1,44 @@
+services:
+  # 1. La Base de Datos PostgreSQL para Chatwoot
+  - name: chatwoot-db
+    type: pserv
+    plan: starter # Puedes empezar con 'free', pero 'starter' es más robusto
+    postgres:
+      version: 13
+
+  # 2. El Servidor Redis para trabajos en segundo plano
+  - name: chatwoot-redis
+    type: pserv
+    plan: starter # Puedes empezar con 'free'
+    redis:
+      version: 6
+
+  # 3. La Aplicación Web Principal de Chatwoot
+  - name: chatwoot-app
+    type: web
+    plan: starter # El plan gratuito puede ser muy lento para Chatwoot
+    env: docker
+    repo: https://github.com/chatwoot/chatwoot # Le dice a Render que use el código oficial
+    dockerfilePath: ./Dockerfile.ce # Usa el Dockerfile de la Community Edition
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: chatwoot-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: pserv
+          name: chatwoot-redis
+          property: connectionString
+      - key: SECRET_KEY_BASE
+        generateValue: true # Render generará una clave secreta segura
+      - key: RAILS_ENV
+        value: production
+      # --- Variables de Entorno Adicionales (¡MUY IMPORTANTE!) ---
+      # Necesitarás añadir más variables aquí según la guía de Chatwoot.
+      # Ve a la sección "Environment" en Render para añadirlas.
+      # Por ejemplo: FRONTEND_URL, MAILER_SENDER_EMAIL, etc.
+
+    # Comando para preparar la base de datos la primera vez
+    preDeployCommand: "bundle exec rails db:chatwoot_prepare"
