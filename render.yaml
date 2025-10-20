@@ -1,6 +1,6 @@
 databases:
   - name: chatwoot-db
-    plan: starter
+    plan: free # <-- CORRECCIÓN: Cambiado de 'starter' a 'free'
     databaseName: chatwoot_production
     user: chatwoot
 
@@ -8,13 +8,13 @@ services:
   # 1. El Servidor Redis para trabajos en segundo plano
   - name: chatwoot-redis
     type: redis
-    plan: starter
+    plan: free # <-- Cambiado a 'free' también para consistencia
     ipAllowList: []
 
   # 2. La Aplicación Web Principal de Chatwoot
   - name: chatwoot-app
     type: web
-    plan: starter
+    plan: free # <-- Cambiado a 'free' para empezar sin costos
     env: docker
     repo: https://github.com/chatwoot/chatwoot
     branch: develop
@@ -34,7 +34,10 @@ services:
       - key: RAILS_ENV
         value: production
       - key: FRONTEND_URL
-        value: https://${RENDER_SERVICE_NAME}.onrender.com # <-- CORRECCIÓN FINAL
+        fromService:
+          type: web
+          name: chatwoot-app
+          property: url
 
     # Comando para preparar la base de datos la primera vez
     preDeployCommand: "bundle exec rails db:chatwoot_prepare"
