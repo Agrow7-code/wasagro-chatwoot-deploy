@@ -2,13 +2,18 @@ services:
   # 1. La Base de Datos PostgreSQL para Chatwoot
   - name: chatwoot-db
     type: pserv
+    runtime: postgres # <-- CORRECCIÓN: Se especifica el 'runtime'
     plan: starter # Puedes empezar con 'free', pero 'starter' es más robusto
+    properties:
+      - key: max_connections
+        value: 100
     postgres:
       version: 13
 
   # 2. El Servidor Redis para trabajos en segundo plano
   - name: chatwoot-redis
     type: pserv
+    runtime: redis # <-- CORRECCIÓN: Se especifica el 'runtime'
     plan: starter # Puedes empezar con 'free'
     redis:
       version: 6
@@ -16,10 +21,10 @@ services:
   # 3. La Aplicación Web Principal de Chatwoot
   - name: chatwoot-app
     type: web
-    plan: starter # El plan gratuito puede ser muy lento para Chatwoot
+    plan: starter
     env: docker
-    repo: https://github.com/chatwoot/chatwoot # Le dice a Render que use el código oficial
-    dockerfilePath: ./Dockerfile.ce # Usa el Dockerfile de la Community Edition
+    repo: https://github.com/chatwoot/chatwoot
+    dockerfilePath: ./Dockerfile.ce
     envVars:
       - key: DATABASE_URL
         fromService:
@@ -32,13 +37,14 @@ services:
           name: chatwoot-redis
           property: connectionString
       - key: SECRET_KEY_BASE
-        generateValue: true # Render generará una clave secreta segura
+        generateValue: true
       - key: RAILS_ENV
         value: production
-      # --- Variables de Entorno Adicionales (¡MUY IMPORTANTE!) ---
-      # Necesitarás añadir más variables aquí según la guía de Chatwoot.
-      # Ve a la sección "Environment" en Render para añadirlas.
-      # Por ejemplo: FRONTEND_URL, MAILER_SENDER_EMAIL, etc.
+      # --- ¡IMPORTANTE! Añade aquí el resto de variables de entorno de Chatwoot ---
+      - key: FRONTEND_URL
+        value: "" # <-- Deja esto vacío por ahora, lo llenarás después
+      - key: MAILER_SENDER_EMAIL
+        value: "no-reply@example.com" # <-- Cambia esto por un correo real
 
     # Comando para preparar la base de datos la primera vez
     preDeployCommand: "bundle exec rails db:chatwoot_prepare"
