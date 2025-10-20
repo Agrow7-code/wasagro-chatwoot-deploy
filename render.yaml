@@ -1,15 +1,16 @@
-services:
-  # 1. La Base de Datos PostgreSQL para Chatwoot
+databases:
   - name: chatwoot-db
-    type: postgres # <-- CORRECCIÓN: Tipo de servicio específico para Postgres
     plan: starter
+    databaseName: chatwoot_production # Nombre de la base de datos interna
+    user: chatwoot
 
-  # 2. El Servidor Redis para trabajos en segundo plano
+services:
+  # 1. El Servidor Redis para trabajos en segundo plano
   - name: chatwoot-redis
-    type: redis # <-- CORRECCIÓN: Tipo de servicio específico para Redis
+    type: redis
     plan: starter
 
-  # 3. La Aplicación Web Principal de Chatwoot
+  # 2. La Aplicación Web Principal de Chatwoot
   - name: chatwoot-app
     type: web
     plan: starter
@@ -19,8 +20,7 @@ services:
     dockerfilePath: ./Dockerfile.ce
     envVars:
       - key: DATABASE_URL
-        fromService:
-          type: postgres
+        fromDatabase:
           name: chatwoot-db
           property: connectionString
       - key: REDIS_URL
@@ -36,7 +36,7 @@ services:
         fromService:
           type: web
           name: chatwoot-app
-          property: externalUrl # <-- CORRECCIÓN: Propiedad correcta para la URL
+          property: externalUrl
 
     # Comando para preparar la base de datos la primera vez
     preDeployCommand: "bundle exec rails db:chatwoot_prepare"
