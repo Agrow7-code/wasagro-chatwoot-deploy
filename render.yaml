@@ -18,7 +18,7 @@ services:
     env: docker
     repo: https://github.com/chatwoot/chatwoot
     branch: develop
-    dockerfilePath: ./Dockerfile.ce
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: DATABASE_URL
         fromDatabase:
