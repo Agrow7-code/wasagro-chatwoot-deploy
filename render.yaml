@@ -1,7 +1,7 @@
 databases:
   - name: chatwoot-db
     plan: starter
-    databaseName: chatwoot_production # Nombre de la base de datos interna
+    databaseName: chatwoot_production
     user: chatwoot
 
 services:
@@ -9,6 +9,7 @@ services:
   - name: chatwoot-redis
     type: redis
     plan: starter
+    ipAllowList: [] # <-- CORRECCIÓN 1: Permite acceso desde cualquier IP (para empezar)
 
   # 2. La Aplicación Web Principal de Chatwoot
   - name: chatwoot-app
@@ -36,7 +37,7 @@ services:
         fromService:
           type: web
           name: chatwoot-app
-          property: externalUrl
+          property: url # <-- CORRECCIÓN 2: La propiedad correcta es 'url'
 
     # Comando para preparar la base de datos la primera vez
     preDeployCommand: "bundle exec rails db:chatwoot_prepare"
